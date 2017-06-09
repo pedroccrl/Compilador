@@ -9,8 +9,8 @@ namespace Compilador
     class Sintatico
     {
         private Token tk;
-        private Lexico lx;
-        private Semantico sem;
+        private Lexico Lex;
+        private Semantico Sem;
         private bool inVar;
         private bool inConst;
         private int k;
@@ -21,8 +21,8 @@ namespace Compilador
             this.inVar = false;
             this.inConst = false;
             this.tempVars = new List<string>();
-            this.sem = new Semantico();
-            this.lx = lx;
+            this.Sem = new Semantico();
+            this.Lex = lx;
             this.tk = lx.NextToken();
             if (tk == null)
                 Console.WriteLine("Arquivo vazio");
@@ -32,18 +32,18 @@ namespace Compilador
         {
             Console.WriteLine("Erro sintatico na linha: " + tk.Linha + "\nSimbolo " + tk.Lexograma + " Inesperado.");
             Console.WriteLine("token \"" + esperado + "\" esperado\n");
-            //System.exit(1);
+            
         }
         private void ErroSint(Token tk)
         {
             Console.WriteLine("Erro sintatico na linha: " + tk.Linha + "\nSimbolo " + tk.Lexograma + " Inesperado.");
-            //System.exit(1);
+            
         }
         private bool Reconhece(String token)
         {
             if (tk.Descricao == token)
             {
-                tk = lx.NextToken();
+                tk = Lex.NextToken();
                 return true;
             }
             else
@@ -68,7 +68,7 @@ namespace Compilador
             }
             while (tk.Descricao != "EOF")
             {
-                tk = lx.NextToken();
+                tk = Lex.NextToken();
             }
         }
         public void CONST()
@@ -90,24 +90,26 @@ namespace Compilador
         {
             if (tk.Descricao == "variavel")
             {
-                String tempLex = tk.Lexograma;
-                String tempTipo;
+                string tempLex = tk.Lexograma;
+                string tempTipo;
                 IDENT();
                 if (Reconhece("="))
                 {
                     if (tk.Descricao == "numfloat" || tk.Descricao == "numint")
                     {
-                        if (tk.Descricao == "numfloat") tempTipo = "real";
-                        else tempTipo = "integer";
+                        if (tk.Descricao == "numfloat")
+                            tempTipo = "real";
+                        else
+                            tempTipo = "integer";
                         NUM();
                         if (!Reconhece(";"))
                         {
                             while (tk.Descricao != "EOF" && tk.Descricao != "begin" && tk.Descricao != "var")
                             {
-                                tk = lx.NextToken();
+                                tk = Lex.NextToken();
                             }
                         }
-                        sem.AddNaTabela(tempLex, tempTipo, 1, k);
+                        Sem.AddNaTabela(tempLex, tempTipo, true, k);
                         //sem.imprimeTabela();
                     }
                     else
@@ -115,7 +117,7 @@ namespace Compilador
                         ErroSint(tk, "numero");
                         while (tk.Descricao != "EOF" && tk.Descricao != "begin" && tk.Descricao != "var")
                         {
-                            tk = lx.NextToken();
+                            tk = Lex.NextToken();
                         }
                     }
                 }
@@ -124,7 +126,7 @@ namespace Compilador
                     ErroSint(tk, "=");
                     while (tk.Descricao != "EOF" && tk.Descricao != "begin" && tk.Descricao != "var")
                     {
-                        tk = lx.NextToken();
+                        tk = Lex.NextToken();
                     }
                 }
             }
@@ -133,7 +135,7 @@ namespace Compilador
                 ErroSint(tk, "variavel");
                 while (tk.Descricao != "EOF" && tk.Descricao != "begin" && tk.Descricao != "var")
                 {
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                 }
             }
         }
@@ -154,7 +156,7 @@ namespace Compilador
                 ErroSint(tk, ";");
                 while (tk.Descricao != "EOF" && tk.Descricao != "begin")
                 {
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                 }
             }
             if (tk.Descricao == "variavel")
@@ -175,8 +177,7 @@ namespace Compilador
                 COMS();
                 if (Reconhece("end"))
                 {
-                    //sem.imprimeTabela();
-                    sem.limpaEscopo(j);
+                    Sem.LimpaEscopo(j);
                     return;
                 }
                 else
@@ -184,7 +185,7 @@ namespace Compilador
                     ErroSint(tk, "end");
                     while (tk.Descricao != "EOF" && tk.Descricao != ";" && tk.Descricao != "else" && tk.Descricao != ".")
                     {
-                        tk = lx.NextToken();
+                        tk = Lex.NextToken();
                     }
                 }
             }
@@ -193,11 +194,11 @@ namespace Compilador
                 ErroSint(tk, "begin");
                 while (tk.Descricao != "EOF" && tk.Descricao != ";" && tk.Descricao != "else" && tk.Descricao != ".")
                 {
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                 }
             }
             //sem.imprimeTabela();
-            sem.limpaEscopo(j);
+            Sem.LimpaEscopo(j);
         }
         public void COMS()
         {
@@ -212,7 +213,7 @@ namespace Compilador
                     ErroSint(tk, ";");
                     while (tk.Descricao != "EOF" && tk.Descricao != "end")
                     {
-                        tk = lx.NextToken();
+                        tk = Lex.NextToken();
                     }
                 }
             }
@@ -222,7 +223,7 @@ namespace Compilador
             switch (tk.Descricao)
             {
                 case "print":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     if (Reconhece("("))
                     {
                         LISTA_IDENT();
@@ -235,7 +236,7 @@ namespace Compilador
                             ErroSint(tk, ")");
                             while (tk.Descricao != "EOF" && tk.Descricao != ";")
                             {
-                                tk = lx.NextToken();
+                                tk = Lex.NextToken();
                             }
                         }
                     }
@@ -244,12 +245,12 @@ namespace Compilador
                         ErroSint(tk, "(");
                         while (tk.Descricao != "EOF" && tk.Descricao != ";")
                         {
-                            tk = lx.NextToken();
+                            tk = Lex.NextToken();
                         }
                     }
                     return true;
                 case "if":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     EXP_REL();
                     if (Reconhece("then"))
                     {
@@ -262,12 +263,12 @@ namespace Compilador
                         ErroSint(tk, "then");
                         while (tk.Descricao != "EOF" && tk.Descricao != ";")
                         {
-                            tk = lx.NextToken();
+                            tk = Lex.NextToken();
                         }
                     }
                     return true;
                 case "for":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     IDENT();
                     if (Reconhece(":="))
                     {
@@ -285,7 +286,7 @@ namespace Compilador
                                 ErroSint(tk, "do");
                                 while (tk.Descricao != "EOF" && tk.Descricao != ";")
                                 {
-                                    tk = lx.NextToken();
+                                    tk = Lex.NextToken();
                                 }
                             }
                         }
@@ -294,7 +295,7 @@ namespace Compilador
                             ErroSint(tk, "to");
                             while (tk.Descricao != "EOF" && tk.Descricao != ";")
                             {
-                                tk = lx.NextToken();
+                                tk = Lex.NextToken();
                             }
                         }
                     }
@@ -303,12 +304,12 @@ namespace Compilador
                         ErroSint(tk, ":=");
                         while (tk.Descricao != "EOF" && tk.Descricao != ";")
                         {
-                            tk = lx.NextToken();
+                            tk = Lex.NextToken();
                         }
                     }
                     return true;
                 case "read":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     if (Reconhece("("))
                     {
                         LISTA_IDENT();
@@ -321,7 +322,7 @@ namespace Compilador
                             ErroSint(tk, ")");
                             while (tk.Descricao != "EOF" && tk.Descricao != ";")
                             {
-                                tk = lx.NextToken();
+                                tk = Lex.NextToken();
                             }
                         }
                     }
@@ -330,7 +331,7 @@ namespace Compilador
                         ErroSint(tk, "(");
                         while (tk.Descricao != "EOF" && tk.Descricao != ";")
                         {
-                            tk = lx.NextToken();
+                            tk = Lex.NextToken();
                         }
 
                     }
@@ -346,7 +347,7 @@ namespace Compilador
                         ErroSint(tk, ":=");
                         while (tk.Descricao != "EOF" && tk.Descricao != ";")
                         {
-                            tk = lx.NextToken();
+                            tk = Lex.NextToken();
                         }
                     }
                     return true;
@@ -376,11 +377,10 @@ namespace Compilador
         {
             if (tk.Descricao == "integer")
             {
-                for (int i = 0; i < this.tempVars.Capacity - 1; i++)
+                for (int i = 0; i < this.tempVars.Count; i++)
                 {
-                    sem.AddNaTabela(this.tempVars[i], "integer", 0, k);
+                    Sem.AddNaTabela(this.tempVars[i], "integer", false, k);
                 }
-                // sem.imprimeTabela();
                 this.tempVars.Clear();
                 Reconhece("integer");
             }
@@ -389,9 +389,9 @@ namespace Compilador
                 if (tk.Descricao == "real")
                 {
                     Reconhece("real");
-                    for (int i = 0; i < this.tempVars.Capacity - 1; i++)
+                    for (int i = 0; i < this.tempVars.Count; i++)
                     {
-                        sem.AddNaTabela(this.tempVars[i], "real", 0, k);
+                        Sem.AddNaTabela(this.tempVars[i], "real", false, k);
                     }
                     this.tempVars.Clear();
                 }
@@ -400,7 +400,7 @@ namespace Compilador
                     ErroSint(tk);
                     while (tk.Descricao != "EOF" && tk.Descricao != "begin" && tk.Descricao != ")")
                     {
-                        tk = lx.NextToken();
+                        tk = Lex.NextToken();
                     }
                 }
             }
@@ -417,7 +417,7 @@ namespace Compilador
                 ErroSint(tk, ":");
                 while (tk.Descricao != "EOF" && tk.Descricao != "begin" && tk.Descricao != ")")
                 {
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                 }
             }
         }
@@ -488,7 +488,7 @@ namespace Compilador
                              && tk.Descricao != "to" && tk.Descricao != "do" && tk.Descricao != ";" && tk.Descricao != "=" && tk.Descricao != "<>"
                              && tk.Descricao != "<" && tk.Descricao != ">" && tk.Descricao != "<=" && tk.Descricao != ">=" && tk.Descricao != "then")
                     {
-                        tk = lx.NextToken();
+                        tk = Lex.NextToken();
                     }
                     return;
                 }
@@ -512,7 +512,7 @@ namespace Compilador
                                  && tk.Descricao != "to" && tk.Descricao != "do" && tk.Descricao != ";" && tk.Descricao != "=" && tk.Descricao != "<>"
                                  && tk.Descricao != "<" && tk.Descricao != ">" && tk.Descricao != "<=" && tk.Descricao != ">=" && tk.Descricao != "then")
                         {
-                            tk = lx.NextToken();
+                            tk = Lex.NextToken();
                         }
                     }
                 }
@@ -530,28 +530,28 @@ namespace Compilador
             switch (tk.Descricao)
             {
                 case "=":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     break;
                 case "<>":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     break;
                 case "<":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     break;
                 case ">":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     break;
                 case "<=":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     break;
                 case ">=":
-                    tk = lx.NextToken();
+                    tk = Lex.NextToken();
                     break;
                 default:
                     ErroSint(tk);
                     while (tk.Descricao != "EOF" && tk.Descricao != "variavel")
                     {
-                        tk = lx.NextToken();
+                        tk = Lex.NextToken();
                     }
                     break;
             }
@@ -579,7 +579,7 @@ namespace Compilador
                 }
                 if (!inVar && !inConst)
                 {
-                    if (sem.ChecaTabela(temp.Lexograma) == -1)
+                    if (Sem.ChecaTabela(temp.Lexograma) == -1)
                     {
                         Console.WriteLine("Erro semantico na linha " + temp.Linha + "\nVariavel: " + temp.Lexograma + "  nao declarada\n");
                     }

@@ -63,6 +63,11 @@ namespace Compilador
             Tabela.Add("EOF", 35);
             Console.WriteLine("Tabela Inicializada");
         }
+        private void ErroLexico(char t)
+        {
+            Console.WriteLine("\nErro Léxico na linha " + Linha + "\nToken Encontrado: " + t);
+
+        }
 
         private string RemoveInvalidos(string linha)
         {
@@ -114,11 +119,7 @@ namespace Compilador
             return t;
         }
 
-        private void ErroLexico(char t)
-        {
-            Console.WriteLine("\nErro Léxico na linha " + Linha + "\nToken Encontrado: " + t);
-            
-        }
+
 
         public Token NextToken()
         {
@@ -127,12 +128,27 @@ namespace Compilador
 
             //Falta Implementar o comentário
 
-            while(LinhaAtual.Length == 0)    //Se o linha atual estiver vazio, leio uma linha do arquivo
+            while(LinhaAtual.Length == 0 || LinhaAtual == " ")    //Se o linha atual estiver vazio, leio uma linha do arquivo
             {
-                LinhaAtual = RemoveInvalidos(Reader.ReadLine());
-
+                LinhaAtual = Reader.ReadLine();
                 Linha++;
             }
+            while(LinhaAtual[0] == ' ')
+            {
+                if(LinhaAtual.Length == 1)
+                {
+                    while (LinhaAtual.Length == 0 || LinhaAtual == " ")    //Se o linha atual estiver vazio, leio uma linha do arquivo
+                    {
+                        LinhaAtual = Reader.ReadLine();
+                        Linha++;
+                    }
+                }
+                else
+                {
+                    LinhaAtual = LinhaAtual.Substring(1);
+                }
+            }
+
             //Agora a ser analisada está na variável LinhaAtual
             if ((LinhaAtual[0] >= 'a' && LinhaAtual[0] <= 'z') || (LinhaAtual[0] >= 'A' && LinhaAtual[0] <= 'Z'))
             {
@@ -170,9 +186,9 @@ namespace Compilador
                 aux = LinhaAtual.Substring(0, i);
                 LinhaAtual = LinhaAtual.Remove(0,i);
                 if (isFloat)
-                    return new Token("real", aux, Tabela["real"], Linha);
+                    return new Token("numfloat", aux, Tabela["numfloat"], Linha);
                 else
-                    return new Token("integer", aux, Tabela["integer"], Linha);
+                    return new Token("numint", aux, Tabela["numint"], Linha);
             }
             else
             {

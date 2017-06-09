@@ -6,85 +6,85 @@ using System.Threading.Tasks;
 
 namespace Compilador
 {
-    class Semantico
+    public class Semantico
     {
+        private class TokenSemantico 
+        {
+            public string Lexograma;
+            public string Tipo;
+            public bool isConstante;
+            public int Escopo;
+
+            public TokenSemantico(string Lexograma, string Tipo, bool isConstante, int Escopo)
+            {
+                this.Lexograma = Lexograma;
+                this.Tipo = Tipo;
+                this.isConstante = isConstante;
+                this.Escopo = Escopo;
+            }
+            public override bool Equals(object obj)
+            {
+                TokenSemantico aux = (TokenSemantico)obj;
+                if (this.Lexograma == aux.Lexograma)
+                    return true;
+                else
+                    return false;
+            }
+        }
         //lexograma, tipo, constante, escopo, valor
-        private List<string> lexograma;
-        private List<string> tipo;
-        private List<int> constante;
-        private List<int> escopo;
+        private List<TokenSemantico> tkSem;
 
         public Semantico()
         {
-            this.lexograma = new List<string>();
-            this.tipo = new List<string>();
-            this.constante = new List<int>();
-            this.escopo = new List<int>();
+            this.tkSem = new List<TokenSemantico>();
         }
 
-        public bool AddNaTabela(string lex, string tip, int con, int esc)
+        public bool AddNaTabela(string lex, string tip, bool con, int esc)
         {
-            if (!lexograma.Contains(lex))
+            TokenSemantico aux = new TokenSemantico(lex, tip, con, esc);
+            if(!tkSem.Contains(aux))
             {
-                //System.out.println("add na tab "+lex);
-                lexograma.Add(lex);
-                tipo.Add(tip);
-                constante.Add(con);
-                escopo.Add(esc);
+                tkSem.Add(aux);
                 return true;
             }
             return false;
         }
+
         public int ChecaTabela(string lex)
         {
-            if (lexograma.Contains(lex) && lexograma.Count > 0)
+            return tkSem.FindIndex(t => t.Lexograma == lex);
+            /*
+            for(int  i = tkSem.Count - 1; i >=0; i--)
             {
-                
-                for (int i = lexograma.Count - 1; i > -1; i--)
-                {
-                    if (lexograma[i] == lex)
-                    {
-                        return i;
-                    }
-                }
+                if (tkSem[i].Lexograma == lex)
+                    return i;
             }
             return -1;
+            */
         }
-        public bool retiraTabela(string lex, int esc)
-        {
 
+        public bool RetiraTabela(string lex, int esc)
+        {
             int i = ChecaTabela(lex);
             if (i > -1)
             {
-                lexograma.RemoveAt(i);
-                escopo.Remove(i);
-                constante.Remove(i);
-                tipo.RemoveAt(i);
+                tkSem.RemoveAt(i);
                 return true;
             }
             return false;
         }
-        public void imprimeTabela()
+        public void ImprimeTabela()
         {
-            for (int i = 0; i < escopo.Count; i++)
+            for (int i = 0; i < tkSem.Count; i++)
             {
-                Console.WriteLine(lexograma[i] + "  " + tipo[i] + "  " + escopo[i] + "   " + constante[i]);
+                Console.WriteLine(tkSem[i].Lexograma + "  " + tkSem[i].Tipo + "  " + tkSem[i].Escopo + "   " + tkSem[i].isConstante);
             }
+            Console.WriteLine("-------------------");
         }
-        public void limpaEscopo(int esc)
+        public void LimpaEscopo(int esc)
         {
-            int i = escopo.Count - 1;
-            while (escopo.Contains(esc) && i > 0)
-            {
-                if (escopo[i] == esc)
-                {
-                    lexograma.RemoveAt(i);
-                    escopo.Remove(i);
-                    constante.Remove(i);
-                    tipo.RemoveAt(i);
-                }
-                i = i - 1;
-            }
+            tkSem.RemoveAll(x => x.Escopo == esc);
+            //ImprimeTabela();
         }
 
     }
