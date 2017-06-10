@@ -87,5 +87,14 @@ namespace Compilador
             //ImprimeTabela();
         }
 
+        public bool TokenConstante(string lex)
+        {
+            return tkSem.Find(t => t.Lexograma == lex).isConstante;
+        }
+        public bool TokenInteger(string lex)
+        {
+            return tkSem.Find(t => t.Lexograma == lex).Tipo == "integer";
+        }
+            
     }
 }

@@ -13,6 +13,8 @@ namespace Compilador
         private Semantico Sem;
         private bool inVar;
         private bool inConst;
+        private bool intRecebendoEsq;
+        private bool intEsq;
         private int k;
         private List<string> tempVars;
 
@@ -92,7 +94,7 @@ namespace Compilador
             {
                 string tempLex = tk.Lexograma;
                 string tempTipo;
-                IDENT();
+                IDENT(false);
                 if (Reconhece("="))
                 {
                     if (tk.Descricao == "numfloat" || tk.Descricao == "numint")
@@ -269,7 +271,7 @@ namespace Compilador
                     return true;
                 case "for":
                     tk = Lex.NextToken();
-                    IDENT();
+                    IDENT(true);
                     if (Reconhece(":="))
                     {
                         EXP();
@@ -337,7 +339,7 @@ namespace Compilador
                     }
                     return true;
                 case "variavel":
-                    IDENT();
+                    IDENT(true);
                     if (Reconhece(":="))
                     {
                         EXP();
@@ -430,7 +432,7 @@ namespace Compilador
         }
         public void LISTA_IDENT()
         {
-            IDENT();
+            IDENT(false);
             LISTA_IDENT1();
         }
         public void EXP1()
@@ -497,7 +499,11 @@ namespace Compilador
             {
                 if (tk.Descricao == "variavel")
                 {
-                    IDENT();
+                    
+                    if(Sem.ChecaTabela(tk.Lexograma) != -1)
+                        intEsq = Sem.TokenInteger(tk.Lexograma);
+                    
+                    IDENT(false);
                 }
                 else
                 {
@@ -527,41 +533,36 @@ namespace Compilador
         }
         public void OP_REL()
         {
-            switch (tk.Descricao)
+            if(tk.Descricao == "=" || tk.Descricao == "<>" || tk.Descricao == "<" ||
+                tk.Descricao == ">" || tk.Descricao == "<=" || tk.Descricao == ">=")
             {
-                case "=":
-                    tk = Lex.NextToken();
-                    break;
-                case "<>":
-                    tk = Lex.NextToken();
-                    break;
-                case "<":
-                    tk = Lex.NextToken();
-                    break;
-                case ">":
-                    tk = Lex.NextToken();
-                    break;
-                case "<=":
-                    tk = Lex.NextToken();
-                    break;
-                case ">=":
-                    tk = Lex.NextToken();
-                    break;
-                default:
-                    ErroSint(tk);
+                tk = Lex.NextToken();
+                if(tk.Descricao == "variavel")
+                {
+                    bool intDir = Sem.TokenInteger(tk.Lexograma);
+                    if (intEsq != intDir) //Comparação entre tipos diferentes.
+                    {
+                        Console.WriteLine("WARNING: Comparação entre tipos diferentes na linha " + tk.Linha + ".\n");
+                    }
+                }
+                    
+                
+            }
+            else
+            {
+                ErroSint(tk);
                     while (tk.Descricao != "EOF" && tk.Descricao != "variavel")
                     {
                         tk = Lex.NextToken();
                     }
-                    break;
             }
         }
-        public void IDENT()
+        public void IDENT(bool estaRecebendo)
         {
             CARACTER();
-            IDENT1();
+            IDENT1(estaRecebendo);
         }
-        public void IDENT1()
+        public void IDENT1(bool estaRecebendo)
         {
             Token temp = tk;
             if (Reconhece("variavel"))
@@ -570,18 +571,36 @@ namespace Compilador
                 {
                     this.tempVars.Add(temp.Lexograma);
                 }
-                IDENT();
-                // sem.imprimeTabela();
+                IDENT(estaRecebendo);
+                /*
                 if (temp.Linha > 26)
                 {
                     int a;
                     a = 10;
                 }
+                */
                 if (!inVar && !inConst)
                 {
                     if (Sem.ChecaTabela(temp.Lexograma) == -1)
                     {
-                        Console.WriteLine("Erro semantico na linha " + temp.Linha + "\nVariavel: " + temp.Lexograma + "  nao declarada\n");
+                        Console.WriteLine("Erro semantico na linha " + temp.Linha);
+                        Console.WriteLine("Variavel: " + temp.Lexograma + "  nao declarada\n");
+                    }
+                    else if (estaRecebendo == true)
+                    {
+                        if (Sem.TokenConstante(temp.Lexograma))
+                        {
+                            Console.WriteLine("Erro semantico na linha " + temp.Linha);
+                            Console.WriteLine("Tentativa de atribuição a constante " + temp.Lexograma + "\n");
+                        }
+                        else if (Sem.TokenInteger(temp.Lexograma))
+                        {
+                            intRecebendoEsq = true; //Variavel global para informar sem tem inteiro recebendo a esq
+                        }
+                        else
+                        {
+                            intRecebendoEsq = false;
+                        }
                     }
                 }
             }
@@ -617,7 +636,6 @@ namespace Compilador
         }
         public void NUMFLOAT()
         {
-
         }
 
 
