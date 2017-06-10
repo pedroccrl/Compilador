@@ -501,8 +501,14 @@ namespace Compilador
                 {
                     
                     if(Sem.ChecaTabela(tk.Lexograma) != -1)
+                    {
                         intEsq = Sem.TokenInteger(tk.Lexograma);
-                    
+                        if(intRecebendoEsq != intEsq)
+                        {
+                            Console.WriteLine("WARNING: Comparação entre tipos diferentes na linha " + tk.Linha + ".\n");
+
+                        }
+                    }
                     IDENT(false);
                 }
                 else
@@ -545,8 +551,6 @@ namespace Compilador
                         Console.WriteLine("WARNING: Comparação entre tipos diferentes na linha " + tk.Linha + ".\n");
                     }
                 }
-                    
-                
             }
             else
             {
