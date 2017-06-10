@@ -503,9 +503,9 @@ namespace Compilador
                     if(Sem.ChecaTabela(tk.Lexograma) != -1)
                     {
                         intEsq = Sem.TokenInteger(tk.Lexograma);
-                        if(intRecebendoEsq != intEsq)
+                        if(intRecebendoEsq == true && intEsq == false)
                         {
-                            Console.WriteLine("WARNING: Comparação entre tipos diferentes na linha " + tk.Linha + ".\n");
+                            Console.WriteLine("WARNING: Atribuição entre tipos diferentes na linha " + tk.Linha + ".\n");
 
                         }
                     }
