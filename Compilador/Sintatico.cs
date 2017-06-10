@@ -513,8 +513,14 @@ namespace Compilador
                 }
                 else
                 {
-                    if (tk.Descricao == "numint" || tk.Descricao == "numfloat")
+                    if (tk.Descricao == "numint" )//|| tk.Descricao == "numfloat")
                     {
+                        NUM();
+                    }
+                    else if(tk.Descricao == "numfloat")
+                    {
+                        if (intRecebendoEsq)
+                            Console.WriteLine("WARNING: Atribuição entre tipos diferentes na linha " + tk.Linha + ".\n");
                         NUM();
                     }
                     else
