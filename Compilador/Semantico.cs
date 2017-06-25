@@ -45,6 +45,7 @@ namespace Compilador
             if(!tkSem.Contains(aux))
             {
                 tkSem.Add(aux);
+                Programa.Codigo.AddSemantico(lex, tip);
                 return true;
             }
             return false;

@@ -26,7 +26,8 @@ namespace Compilador
 
         private void InicializaTabela()
         {
-            Tabela.Add(".", 1);
+            Token t;
+            Tabela.Add(".", (int)TokenId.Ponto);
             Tabela.Add("var", 2);
             Tabela.Add(",", 3);
             Tabela.Add(";", 4);
